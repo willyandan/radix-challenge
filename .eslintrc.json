@@ -41,6 +41,9 @@
         "object-shorthand": "error",
         "prefer-const": "error",
         "no-trailing-spaces": "error",
-        "comma-dangle": "warn"
+        "comma-dangle": "warn",
+        "no-unused-vars": "off",
+        "@typescript-eslint/no-unused-vars": "error",
+        "no-unused-private-class-members": "error"
     }
 }

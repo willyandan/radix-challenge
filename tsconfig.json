@@ -2,15 +2,22 @@
   "compilerOptions": {
     "target": "es5",
     "module": "commonjs",
-    "lib": ["es6"],
+    "lib": [
+      "es6"
+    ],
     "allowJs": true,
     "outDir": "build",
     "rootDir": "src",
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "experimentalDecorators": true
   },
-  "include": ["./src/**/*"],
-  "exclude": ["./eslint.config.mjs"]
+  "include": [
+    "./src/**/*"
+  ],
+  "exclude": [
+    "eslint.config.js"
+  ]
 }
