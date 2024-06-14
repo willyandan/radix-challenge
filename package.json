@@ -6,7 +6,7 @@
     "build": "rimraf ./build && tsc",
     "start": "npm run build && node build/index.js",
     "start:dev": "npx nodemon",
-    "lint": "npx eslint",
+    "lint": "npx eslint .",
     "prepare": "husky",
     "commit": "git-cz"
   },
