@@ -1,1 +1,0 @@
-export { HealthRoute } from './HealthRoute'
