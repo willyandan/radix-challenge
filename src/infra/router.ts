@@ -54,7 +54,7 @@ export class Router {
       return undefined
     }
     const requestParams = this.getHttpRequestData(req, routeMetadata.requestMapper)
-    const request = plainToInstance(routeMetadata.requestClass, requestParams, { excludeExtraneousValues: true })
+    const request = plainToInstance(routeMetadata.requestClass, requestParams, { excludeExtraneousValues: true, exposeDefaultValues: true })
 
     await validateOrReject(request)
 
@@ -94,7 +94,7 @@ export class Router {
 
     const methods = {
       [HttpMethods.GET]: () => {
-        router.get(routeMetadata.path)
+        router.get(routeMetadata.path, ...functionsPipeline)
       },
       [HttpMethods.POST]: () => {
         router.post(routeMetadata.path, ...functionsPipeline)
