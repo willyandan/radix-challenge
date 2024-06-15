@@ -9,4 +9,6 @@
     "editor.codeActionsOnSave": {
         "source.fixAll.eslint": "explicit",
     },
+    "files.eol": "\n",
+    "editor.tabSize": 2
 }
