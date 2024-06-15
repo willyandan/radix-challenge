@@ -12,6 +12,9 @@ import { plainToInstance } from 'class-transformer'
 import { Sensor } from '../../domain/models/Sensor'
 import { validate } from 'class-validator'
 import { RegisSensorBatch } from '../../domain/useCases/RegisterSensorBatch'
+import { GetSensorAverageByTimeRequest } from '../http/requests/GetSensorAverageByTimeRequest'
+import { GetSensorAverageByTime } from '../../domain/useCases/GetSensorAverageByTime'
+import { GetSensorAverageByTimeResponse } from '../http/responses/GetSensorAverageByTimeResponse'
 
 @injectable()
 @controller
@@ -23,36 +26,15 @@ export class SensorController {
   @inject(RegisSensorBatch)
   private registerSensorBatchUseCase!: RegisSensorBatch
 
+  @inject(GetSensorAverageByTime)
+  private getSensorAverageByTimeUseCase!: GetSensorAverageByTime
+
   @route(HttpMethods.POST, '/sensor')
   @request(CreateSensorRequest)
   async createSensor(request: CreateSensorRequest) {
 
     await this.registerSensorUseCase.execute(request.toSensor())
     return new CreateSensorResponse()
-  }
-
-  @route(HttpMethods.POST, '/sensor/batch')
-  @request(CreateSensorBatchRequest, [RequestMapper.BODY, RequestMapper.FILE])
-  createSensorBatch(request: CreateSensorBatchRequest) {
-    return new Promise((resolve, reject) => {
-      const readStream = createReadStream(request.file.path)
-      readStream
-        .pipe(this.readCsvChunks())
-        .pipe(this.transformCsvToObject())
-        .on('data', async (chunk: Buffer) => {
-          const json: Array<Record<string, string>> = deserialize(chunk)
-          const sensors = plainToInstance(Sensor, json, { excludeExtraneousValues: true })
-          const errors = await validate(sensors)
-          if (errors.length) {
-            console.log(errors)
-            reject(new Error())
-          }
-          this.registerSensorBatchUseCase.execute(sensors)
-        })
-        .on('finish', () => {
-          resolve(new CreateSensorResponse())
-        })
-    })
   }
 
   private readCsvChunks(): Transform {
@@ -105,4 +87,37 @@ export class SensorController {
       }
     })
   }
+
+  @route(HttpMethods.POST, '/sensor/batch')
+  @request(CreateSensorBatchRequest, [RequestMapper.BODY, RequestMapper.FILE])
+  createSensorBatch(request: CreateSensorBatchRequest) {
+    return new Promise((resolve, reject) => {
+      const readStream = createReadStream(request.file.path)
+      readStream
+        .pipe(this.readCsvChunks())
+        .pipe(this.transformCsvToObject())
+        .on('data', async (chunk: Buffer) => {
+          const json: Array<Record<string, string>> = deserialize(chunk)
+          const sensors = plainToInstance(Sensor, json, { excludeExtraneousValues: true })
+          const errors = await validate(sensors)
+          if (errors.length) {
+            console.log(errors)
+            reject(new Error())
+          }
+          this.registerSensorBatchUseCase.execute(sensors)
+        })
+        .on('finish', () => {
+          resolve(new CreateSensorResponse())
+        })
+    })
+  }
+
+  @route(HttpMethods.GET, '/sensor/chart')
+  @request(GetSensorAverageByTimeRequest, [RequestMapper.QUERY])
+  async getSensorAverageByTime(request: GetSensorAverageByTimeRequest) {
+    const result = await this.getSensorAverageByTimeUseCase.execute(request)
+    return new GetSensorAverageByTimeResponse(result)
+  }
+
+
 }
