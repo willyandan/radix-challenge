@@ -1,8 +1,10 @@
 import { MongoClient } from 'mongodb'
 import { env } from '../../env'
 import { injectable } from 'inversify'
+import { database } from '../../decorators/database'
 
 @injectable()
+@database
 export class MongoDb {
   private client: MongoClient
   constructor() {

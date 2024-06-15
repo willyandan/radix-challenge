@@ -1,5 +1,5 @@
 import express, { Express } from 'express'
-import { Router } from './infra'
+import { Router } from './infra/router'
 import { Container } from './infra/container'
 export class Server {
   app: Express

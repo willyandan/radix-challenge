@@ -1,27 +1,36 @@
 import { Container as InversifyContainer } from 'inversify'
-import { ISensorRepository } from '../../domain/repositories/ISensorRepository'
-import { TYPES } from './types'
-import { SensorMongoRepository } from '../repositories/SensorMongoRepository'
-import { RegisterSensor } from '../../domain/useCases/RegisterSensor'
-import { MongoDb } from '../database/MongoDb'
-import { SensorController } from '../../application/controller/SensorController'
-import { HealthController } from '../../application/controller/HealthController'
+import { controllerList } from '../../decorators/controller'
+import { IController } from '../../application/controller/IController'
+import { useCaseList } from '../../decorators/useCase'
+import { databaseList } from '../../decorators/database'
+import { repositoryList } from '../../decorators/repositories'
 
 export class Container {
   container = new InversifyContainer()
 
   loadBinds() {
     //DATABASES
-    this.container.bind<MongoDb>(TYPES.database.MongoDB).to(MongoDb).inSingletonScope()
+    for (const database of databaseList) {
+      this.container.bind(database).toSelf().inSingletonScope()
 
-    //REPOSITORIES
-    this.container.bind<ISensorRepository>(TYPES.repositories.ISensorRepository).to(SensorMongoRepository).inSingletonScope()
-
-    //CONTROLLER
-    this.container.bind<HealthController>(TYPES.controllers.HealthController).to(HealthController).inSingletonScope()
-    this.container.bind<SensorController>(TYPES.controllers.SensorController).to(SensorController).inSingletonScope()
+    }
 
     //USE CASES
-    this.container.bind<RegisterSensor>(TYPES.useCases.RegisterSensor).to(RegisterSensor).inSingletonScope()
+    for (const useCase of useCaseList) {
+      this.container.bind(useCase).toSelf().inSingletonScope()
+
+    }
+
+    //REPOSITORIES
+    for (const repository of repositoryList) {
+      this.container.bind(repository.symbol).to(repository.class).inSingletonScope()
+    }
+
+    //CONTROLLER
+    for (const controller of controllerList) {
+      this.container.bind<IController>(controller.name).to(controller).inSingletonScope()
+    }
+
+
   }
 }

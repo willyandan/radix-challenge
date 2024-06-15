@@ -1,13 +1,14 @@
 
 import { inject, injectable } from 'inversify'
 import { Sensor } from '../models/Sensor'
-import { ISensorRepository } from '../repositories/ISensorRepository'
-import { TYPES } from '../../infra/container/types'
+import { ISensorRepository, ISensorRepositorySymbol } from '../repositories/ISensorRepository'
+import { useCase } from '../../decorators/useCase'
 
 @injectable()
+@useCase
 export class RegisterSensor {
 
-  @inject(TYPES.repositories.ISensorRepository)
+  @inject(ISensorRepositorySymbol)
   private sensorRepo!: ISensorRepository
 
   async execute(sensorData: Sensor) {

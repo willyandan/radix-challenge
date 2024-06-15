@@ -4,10 +4,10 @@ import { IResponse } from '../application/http/responses/IResponse'
 import { instanceToPlain, plainToInstance } from 'class-transformer'
 import { HttpStatusEnum } from '../application/http/HttpStatusEnum'
 import { validateOrReject } from 'class-validator'
-import { TYPES } from './container/types'
 import { Container } from './container'
 import { IController } from '../application/controller/IController'
 import { HttpMethods, RequestMapper, RouteMetadata } from '../decorators/route'
+import { controllerList } from '../decorators/controller'
 
 type ExpressRouteFunction = (req: Request, res: Response, next?: NextFunction) => void
 type RouteFunction = (req?: IRequest) => Promise<IResponse>
@@ -108,13 +108,7 @@ export class Router {
   }
 
   getRoutes() {
-    type keys = keyof typeof TYPES.controllers
-    const controllers = Object.keys(TYPES.controllers).map((key: string): IController => {
-      const controllerKey = key as keys
-      const controller = this.container.container.get<IController>(TYPES.controllers[controllerKey])
-      return controller
-    })
-
+    const controllers = controllerList.map(controller => this.container.container.get<IController>(controller.name))
     this.loadRoutes(controllers)
     return this.router
   }

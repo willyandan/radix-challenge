@@ -1,16 +1,17 @@
 import { inject, injectable } from 'inversify'
 import { MongoDb } from '../database/MongoDb'
-import { TYPES } from '../container/types'
 import { env } from '../../env'
-import { ISensorRepository } from '../../domain/repositories/ISensorRepository'
+import { ISensorRepository, ISensorRepositorySymbol } from '../../domain/repositories/ISensorRepository'
 import { Sensor } from '../../domain/models/Sensor'
+import { repository } from '../../decorators/repositories'
 
 const SENSOR_COLLECTION = 'sensor'
 
 @injectable()
+@repository(ISensorRepositorySymbol)
 export class SensorMongoRepository implements ISensorRepository {
 
-  @inject(TYPES.database.MongoDB)
+  @inject(MongoDb)
   private mongoDb!: MongoDb
 
   connect() {
