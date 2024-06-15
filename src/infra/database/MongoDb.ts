@@ -7,7 +7,6 @@ export class MongoDb {
   private client: MongoClient
   constructor() {
     const url = env('MONGODB_URL') || ''
-    console.log({ url })
     this.client = new MongoClient(url, { appName: env('APP_NAME') })
   }
   async connect(db: string) {

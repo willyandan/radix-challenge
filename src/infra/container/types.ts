@@ -2,9 +2,9 @@ const TYPES = {
   repositories: {
     ISensorRepository: Symbol('ISensorRepository')
   },
-  routes: {
-    HealthRoute: Symbol('HealthRoute'),
-    SensorRoute: Symbol('SensorRoute')
+  controllers: {
+    HealthController: Symbol('HealthController'),
+    SensorController: Symbol('SensorController')
   },
   useCases: {
     RegisterSensor: Symbol('RegisterSensor')

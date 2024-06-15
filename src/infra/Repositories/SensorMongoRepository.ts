@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify'
-import { Sensor } from '../../Domain/Models/Sensor'
-import { ISensorRepository } from '../../Domain/Repositories/ISensorRepository'
 import { MongoDb } from '../database/MongoDb'
 import { TYPES } from '../container/types'
 import { env } from '../../env'
+import { ISensorRepository } from '../../domain/repositories/ISensorRepository'
+import { Sensor } from '../../domain/models/Sensor'
 
 const SENSOR_COLLECTION = 'sensor'
 

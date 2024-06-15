@@ -1,7 +1,7 @@
 
 import { inject, injectable } from 'inversify'
-import { Sensor } from '../Models/Sensor'
-import { ISensorRepository } from '../Repositories/ISensorRepository'
+import { Sensor } from '../models/Sensor'
+import { ISensorRepository } from '../repositories/ISensorRepository'
 import { TYPES } from '../../infra/container/types'
 
 @injectable()

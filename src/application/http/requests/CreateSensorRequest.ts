@@ -1,9 +1,9 @@
 import { Expose, Type } from 'class-transformer'
-import { IRequest } from '../IRequest'
+import { IRequest } from './IRequest'
 import { IsDate, IsNumber, IsString } from 'class-validator'
-import { Sensor } from '../../../Domain/Models/Sensor'
+import { Sensor } from '../../../domain/models/Sensor'
 
-export class SensorRoutePostRequest implements IRequest {
+export class CreateSensorRequest implements IRequest {
   @Expose()
   @IsString() equipmentId!: string
 
