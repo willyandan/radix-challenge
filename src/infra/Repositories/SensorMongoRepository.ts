@@ -24,4 +24,10 @@ export class SensorMongoRepository implements ISensorRepository {
     const collection = database.collection(SENSOR_COLLECTION)
     await collection.insertOne(sensor)
   }
+
+  async createMany(sensors: Sensor[]): Promise<void> {
+    const database = await this.connect()
+    const collection = database.collection(SENSOR_COLLECTION)
+    await collection.insertMany(sensors)
+  }
 }
