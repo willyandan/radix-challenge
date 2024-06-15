@@ -12,7 +12,8 @@ export const enum HttpMethods {
 export const enum RequestMapper {
   'BODY',
   'PARAMS',
-  'QUERY'
+  'QUERY',
+  'FILE'
 }
 
 export type RouteMetadata = { path: string, method: HttpMethods, requestClass?: ClassConstructor<IRequest>, requestMapper?: Array<RequestMapper> }

@@ -1,4 +1,4 @@
-import { Router as ExpressRouter, Request, Response, NextFunction } from 'express'
+import { Router as ExpressRouter, Request } from 'express'
 import { IRequest } from '../application/http/requests/IRequest'
 import { IResponse } from '../application/http/responses/IResponse'
 import { instanceToPlain, plainToInstance } from 'class-transformer'
@@ -8,16 +8,26 @@ import { Container } from './container'
 import { IController } from '../application/controller/IController'
 import { HttpMethods, RequestMapper, RouteMetadata } from '../decorators/route'
 import { controllerList } from '../decorators/controller'
+import multer, { Multer } from 'multer'
+import { RequestHandler } from 'express-serve-static-core'
 
-type ExpressRouteFunction = (req: Request, res: Response, next?: NextFunction) => void
 type RouteFunction = (req?: IRequest) => Promise<IResponse>
 
 export class Router {
   private router: ExpressRouter
+  private multer: Multer
+
   constructor(
     private container: Container
   ) {
     this.router = ExpressRouter()
+    const storage = multer.diskStorage({
+      destination: 'public/csv',
+      filename(req, file, callback) {
+        callback(null, `${Date.now()}_${file.originalname}`)
+      }
+    })
+    this.multer = multer({ storage })
   }
 
   private getHttpRequestData(req: Request, requestMapper: Array<RequestMapper>): Record<string, object> {
@@ -31,6 +41,9 @@ export class Router {
       }
       if (requestType === RequestMapper.QUERY) {
         data = { ...data, ...req.query }
+      }
+      if (requestType === RequestMapper.FILE) {
+        data = { ...data, file: req.file }
       }
     }
     return data
@@ -48,8 +61,9 @@ export class Router {
     return request
   }
 
-  private routeExecutor(routeFunction: RouteFunction, routeMetadata: RouteMetadata): ExpressRouteFunction {
+  private routeExecutor(routeFunction: RouteFunction, routeMetadata: RouteMetadata): RequestHandler {
     return async (req, res) => {
+
       try {
         const request = await this.getRequestData(req, routeMetadata)
         const result = await routeFunction(request)
@@ -66,23 +80,33 @@ export class Router {
     }
   }
 
+
+
   private registerRoute(router: ExpressRouter, routeFunction: RouteFunction, routeMetadata: RouteMetadata) {
+
+    const hasFile = routeMetadata.requestMapper?.find((val) => val === RequestMapper.FILE)
+
+    const functionsPipeline: Array<RequestHandler> = []
+    if (hasFile) {
+      functionsPipeline.push(this.multer.single('file'))
+    }
+    functionsPipeline.push(this.routeExecutor(routeFunction, routeMetadata))
 
     const methods = {
       [HttpMethods.GET]: () => {
-        router.get(routeMetadata.path, this.routeExecutor(routeFunction, routeMetadata))
+        router.get(routeMetadata.path)
       },
       [HttpMethods.POST]: () => {
-        router.post(routeMetadata.path, this.routeExecutor(routeFunction, routeMetadata))
+        router.post(routeMetadata.path, ...functionsPipeline)
       },
       [HttpMethods.PUT]: () => {
-        router.put(routeMetadata.path, this.routeExecutor(routeFunction, routeMetadata))
+        router.put(routeMetadata.path, ...functionsPipeline)
       },
       [HttpMethods.DELETE]: () => {
-        router.delete(routeMetadata.path, this.routeExecutor(routeFunction, routeMetadata))
+        router.delete(routeMetadata.path, ...functionsPipeline)
       },
       [HttpMethods.PATCH]: () => {
-        router.patch(routeMetadata.path, this.routeExecutor(routeFunction, routeMetadata))
+        router.patch(routeMetadata.path, ...functionsPipeline)
       }
     }
     methods[routeMetadata.method]()
