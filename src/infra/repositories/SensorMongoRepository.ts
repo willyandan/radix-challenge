@@ -288,4 +288,19 @@ export class SensorMongoRepository implements ISensorRepository {
 
     return results.map((result) => new SensorAverage(result._id, result.avg))
   }
+
+  async getEquipments(): Promise<string[]> {
+    const database = await this.connect()
+    const collection = database.collection(SENSOR_COLLECTION)
+    const results = await collection.aggregate([
+      {
+        $group: {
+          _id: '$equipmentId'
+        }
+      }
+    ]).toArray()
+
+    return results.map(({ _id }) => _id)
+
+  }
 }
