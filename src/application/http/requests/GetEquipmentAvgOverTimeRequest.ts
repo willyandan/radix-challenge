@@ -1,11 +1,11 @@
 import { Expose, Transform, Type } from 'class-transformer'
 import { IsArray, IsDate, IsEnum } from 'class-validator'
-import { TimeUnit } from '../../../domain/models/EquipmentAvgOverTimeParams'
+import { TimeUnit } from '../../../domain/models/TimeUnit'
 
 
 
 export class GetEquipmentAvgOverTimeRequest {
-  @Expose({})
+  @Expose()
   @IsEnum(TimeUnit)
   public unit: TimeUnit = TimeUnit.Day
 
