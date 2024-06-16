@@ -1,4 +1,4 @@
-import { TimeUnit } from './TimeUnit'
+import { TimeUnit } from '../../models/TimeUnit'
 
 export class EquipmentStandardDeviationParams {
   constructor(
