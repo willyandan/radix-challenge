@@ -1,4 +1,4 @@
-import { TimeUnit } from './EquipmentAvgOverTimeParams'
+import { TimeUnit } from './TimeUnit'
 
 export class GetEquipmentByTimeParams {
   constructor(

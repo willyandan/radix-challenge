@@ -1,4 +1,4 @@
-import { TimeUnit } from '../models/EquipmentAvgOverTimeParams'
+import { TimeUnit } from '../models/TimeUnit'
 
 export const unitToMs = (unit: TimeUnit) => {
   const table: Record<TimeUnit, number> = {
