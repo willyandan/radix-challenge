@@ -1,8 +1,8 @@
 import { inject, injectable } from 'inversify'
 import { useCase } from '../../decorators/useCase'
-import { EquipmentAvgOverTimeParams } from '../models/EquipmentAvgOverTimeParams'
+import { EquipmentAvgOverTimeParams } from './params/EquipmentAvgOverTimeParams'
 import { ISensorRepository, ISensorRepositorySymbol } from '../repositories/ISensorRepository'
-import { GetEquipmentByTimeParams } from '../models/GetEquipmentByTimeParams'
+import { GetEquipmentByTimeParams } from '../repositories/params/GetEquipmentByTimeParams'
 import { calculateStartDate } from '../utils/calculateStartDate'
 
 @injectable()

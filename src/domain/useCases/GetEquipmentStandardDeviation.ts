@@ -1,9 +1,9 @@
 import { inject, injectable } from 'inversify'
 import { useCase } from '../../decorators/useCase'
-import { EquipmentStandardDeviationParams } from '../models/EquipmentStandardDeviationParams'
+import { EquipmentStandardDeviationParams } from './params/EquipmentStandardDeviationParams'
 import { ISensorRepository, ISensorRepositorySymbol } from '../repositories/ISensorRepository'
 import { calculateStartDate } from '../utils/calculateStartDate'
-import { GetEquipmentStandardDeviationParams } from '../models/GetEquipmentStandardDeviationParams'
+import { GetEquipmentStandardDeviationParams } from '../repositories/params/GetEquipmentStandardDeviationParams'
 
 @injectable()
 @useCase

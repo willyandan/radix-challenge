@@ -9,7 +9,7 @@ import { GetEquipmentByTimeParams } from '../../domain/models/GetEquipmentByTime
 import { unitToMs } from '../../domain/utils/unitToMs'
 import { Document } from 'mongodb'
 import { EquipmentStandardDeviation } from '../../domain/models/EquipmentStandardDeviation'
-import { GetEquipmentStandardDeviationParams } from '../../domain/models/GetEquipmentStandardDeviationParams'
+import { GetEquipmentStandardDeviationParams } from '../../domain/repositories/params/GetEquipmentStandardDeviationParams'
 
 const SENSOR_COLLECTION = 'sensor'
 
