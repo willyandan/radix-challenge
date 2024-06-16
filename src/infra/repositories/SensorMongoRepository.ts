@@ -5,11 +5,12 @@ import { ISensorRepository, ISensorRepositorySymbol } from '../../domain/reposit
 import { Sensor } from '../../domain/models/Sensor'
 import { repository } from '../../decorators/repositories'
 import { EquipmentAvgOverTime } from '../../domain/models/EquipmentAvgOverTime'
-import { GetEquipmentByTimeParams } from '../../domain/models/GetEquipmentByTimeParams'
-import { unitToMs } from '../../domain/utils/unitToMs'
+import { GetEquipmentByTimeParams } from '../../domain/repositories/params/GetEquipmentByTimeParams'
 import { Document } from 'mongodb'
 import { EquipmentStandardDeviation } from '../../domain/models/EquipmentStandardDeviation'
 import { GetEquipmentStandardDeviationParams } from '../../domain/repositories/params/GetEquipmentStandardDeviationParams'
+import { SensorAverage } from '../../domain/models/SensorAverage'
+import { GetSensorAvgParams } from '../../domain/repositories/params/GetSensorAvgParams'
 
 const SENSOR_COLLECTION = 'sensor'
 
@@ -43,6 +44,22 @@ export class SensorMongoRepository implements ISensorRepository {
 
     const query: Array<Document> = [
       {
+        $addFields: {
+          startDate: {
+            $dateTrunc: {
+              date: params.startDate,
+              unit: params.unit
+            }
+          },
+          endDate: {
+            $dateTrunc: {
+              date: params.endDate,
+              unit: params.unit
+            }
+          }
+        }
+      },
+      {
         $match: {
           $expr: {
             $in: ['$equipmentId', params.equipments]
@@ -54,8 +71,14 @@ export class SensorMongoRepository implements ISensorRepository {
         $addFields: {
           dateDiff: {
             $dateDiff: {
-              startDate: params.startDate,
-              endDate: params.endDate,
+              startDate: '$startDate',
+              endDate: '$endDate',
+              unit: params.unit
+            }
+          },
+          dateTrunc: {
+            $dateTrunc: {
+              date: '$timestamp',
               unit: params.unit
             }
           }
@@ -64,12 +87,6 @@ export class SensorMongoRepository implements ISensorRepository {
 
       {
         $addFields: {
-          dateTrunc: {
-            $dateTrunc: {
-              date: '$timestamp',
-              unit: params.unit
-            }
-          },
           date: {
             $map: {
               input: {
@@ -80,10 +97,11 @@ export class SensorMongoRepository implements ISensorRepository {
               },
               as: 'dd',
               in: {
-                $add: [
-                  params.startDate,
-                  { $multiply: ['$$dd', unitToMs(params.unit)] }
-                ]
+                $dateAdd: {
+                  startDate: '$startDate',
+                  unit: params.unit,
+                  amount: '$$dd'
+                }
               }
             }
           }
@@ -157,5 +175,117 @@ export class SensorMongoRepository implements ISensorRepository {
     ]).toArray()
 
     return results.map((result) => new EquipmentStandardDeviation(result._id, result.stdDev))
+  }
+
+  async getSensorAvg(params: GetSensorAvgParams): Promise<SensorAverage[]> {
+    const database = await this.connect()
+    const collection = database.collection(SENSOR_COLLECTION)
+    const results = await collection.aggregate([
+      {
+        $addFields: {
+          startDate: {
+            $dateTrunc: {
+              date: params.startDate,
+              unit: params.unit
+            }
+          },
+          endDate: {
+            $dateTrunc: {
+              date: params.endDate,
+              unit: params.unit
+            }
+          }
+        }
+      },
+      {
+        $match: {
+          $expr: {
+            $and: [
+              {
+                $lte: ['$timestamp', '$endDate']
+              },
+              {
+                $gte: ['$timestamp', '$startDate']
+              }
+            ]
+          }
+        }
+      },
+      {
+        $addFields: {
+          dateDiff: {
+            $dateDiff: {
+              startDate: '$startDate',
+              endDate: '$endDate',
+              unit: params.unit
+            }
+          },
+          dateTrunc: {
+            $dateTrunc: {
+              date: '$timestamp',
+              unit: params.unit
+            }
+          }
+        }
+      },
+      {
+        $addFields: {
+          date: {
+            $map: {
+              input: {
+                $range: [
+                  0,
+                  {
+                    $add: ['$dateDiff', 1]
+                  }
+                ]
+              },
+              as: 'dd',
+              in: {
+                $dateAdd: {
+                  startDate: '$startDate',
+                  unit: params.unit,
+                  amount: '$$dd'
+                }
+              }
+            }
+          }
+        }
+      },
+      {
+        $unwind: '$date'
+      },
+      {
+        $project: {
+          equipmentId: '$equipmentId',
+          date: '$date',
+          value: {
+            $cond: {
+              if: {
+                $eq: ['$date', '$dateTrunc']
+              },
+              then: '$value',
+              else: 0
+            }
+          }
+        }
+      },
+      {
+        $group: {
+          _id: '$date',
+          avg: {
+            $avg: '$value'
+          }
+        }
+      },
+      {
+        $sort: {
+          '_id': 1
+        }
+      }
+    ]
+    ).toArray()
+
+    return results.map((result) => new SensorAverage(result._id, result.avg))
   }
 }
