@@ -4,8 +4,10 @@ import { env } from '../../env'
 import { ISensorRepository, ISensorRepositorySymbol } from '../../domain/repositories/ISensorRepository'
 import { Sensor } from '../../domain/models/Sensor'
 import { repository } from '../../decorators/repositories'
-import { SensorAverageByTimeParams } from '../../domain/models/SensorAverageByTimeParams'
-import { SensorAverageByTime } from '../../domain/models/SensorAverageByTime'
+import { EquipmentAvgOverTime } from '../../domain/models/EquipmentAvgOverTime'
+import { GetEquipmentByTimeParams } from '../../domain/models/GetEquipmentByTimeParams'
+import { unitToMs } from '../../domain/utils/unitToMs'
+import { Document } from 'mongodb'
 
 const SENSOR_COLLECTION = 'sensor'
 
@@ -33,18 +35,71 @@ export class SensorMongoRepository implements ISensorRepository {
     await collection.insertMany(sensors)
   }
 
-  async getAverageByTime(params: SensorAverageByTimeParams): Promise<Array<SensorAverageByTime>> {
+  async getEquipmentAvgByTime(params: GetEquipmentByTimeParams): Promise<Array<EquipmentAvgOverTime>> {
     const database = await this.connect()
     const collection = database.collection(SENSOR_COLLECTION)
-    const results = await collection.aggregate([
+
+    const query: Array<Document> = [
       {
-        $project: {
-          equipmentId: 1,
-          value: 1,
-          truncatedDate: {
+        $match: {
+          $expr: {
+            $in: ['$equipmentId', params.equipments]
+          }
+        }
+      },
+
+      {
+        $addFields: {
+          dateDiff: {
+            $dateDiff: {
+              startDate: params.startDate,
+              endDate: params.endDate,
+              unit: params.unit
+            }
+          }
+        }
+      },
+
+      {
+        $addFields: {
+          dateTrunc: {
             $dateTrunc: {
               date: '$timestamp',
               unit: params.unit
+            }
+          },
+          date: {
+            $map: {
+              input: {
+                $range: [
+                  0,
+                  { $add: ['$dateDiff', 1] }
+                ]
+              },
+              as: 'dd',
+              in: {
+                $add: [
+                  params.startDate,
+                  { $multiply: ['$$dd', unitToMs(params.unit)] }
+                ]
+              }
+            }
+          }
+        }
+      },
+
+      { $unwind: '$date' },
+      {
+        $project: {
+          equipmentId: '$equipmentId',
+          date: '$date',
+          value: {
+            $cond: {
+              if: {
+                $eq: [{ $dateDiff: { startDate: '$dateTrunc', endDate: '$date', unit: params.unit } }, 0]
+              },
+              then: '$value',
+              else: 0
             }
           }
         }
@@ -52,34 +107,21 @@ export class SensorMongoRepository implements ISensorRepository {
       {
         $group: {
           _id: {
-            truncatedDate: '$truncatedDate',
-            equipmentId: '$equipmentId'
+            equipmentId: '$equipmentId',
+            date: '$date'
           },
-          average: { $avg: '$value' }
-        }
-      },
-      {
-        $group: {
-          _id: '$_id.truncatedDate',
-          equipments: {
-            $push: {
-              equipmentId: '$_id.equipmentId',
-              average: '$average'
-            }
-          }
+          avg: { $avg: '$value' }
         }
       },
       {
         $sort: {
-          '_id': -1
+          '_id.date': 1
         }
-      },
-      {
-        $limit: params.limit
       }
-    ]).toArray()
+    ]
 
-    return results.map((result) => new SensorAverageByTime(result._id, result.equipments))
+    const results = await collection.aggregate(query).toArray()
 
+    return results.map((result) => new EquipmentAvgOverTime(result._id.date, result._id.equipmentId, result.avg))
   }
 }

@@ -12,9 +12,6 @@ import { plainToInstance } from 'class-transformer'
 import { Sensor } from '../../domain/models/Sensor'
 import { validate } from 'class-validator'
 import { RegisSensorBatch } from '../../domain/useCases/RegisterSensorBatch'
-import { GetSensorAverageByTimeRequest } from '../http/requests/GetSensorAverageByTimeRequest'
-import { GetSensorAverageByTime } from '../../domain/useCases/GetSensorAverageByTime'
-import { GetSensorAverageByTimeResponse } from '../http/responses/GetSensorAverageByTimeResponse'
 
 @injectable()
 @controller
@@ -25,9 +22,6 @@ export class SensorController {
 
   @inject(RegisSensorBatch)
   private registerSensorBatchUseCase!: RegisSensorBatch
-
-  @inject(GetSensorAverageByTime)
-  private getSensorAverageByTimeUseCase!: GetSensorAverageByTime
 
   @route(HttpMethods.POST, '/sensor')
   @request(CreateSensorRequest)
@@ -111,13 +105,4 @@ export class SensorController {
         })
     })
   }
-
-  @route(HttpMethods.GET, '/sensor/chart')
-  @request(GetSensorAverageByTimeRequest, [RequestMapper.QUERY])
-  async getSensorAverageByTime(request: GetSensorAverageByTimeRequest) {
-    const result = await this.getSensorAverageByTimeUseCase.execute(request)
-    return new GetSensorAverageByTimeResponse(result)
-  }
-
-
 }

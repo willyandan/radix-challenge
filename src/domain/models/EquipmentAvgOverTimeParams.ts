@@ -1,4 +1,4 @@
-export enum SensorAverageByTimeUnit {
+export enum TimeUnit {
   Year = 'year',
   Quarter = 'quarter',
   Week = 'week',
@@ -8,10 +8,11 @@ export enum SensorAverageByTimeUnit {
   Minute = 'minute'
 }
 
-export class SensorAverageByTimeParams {
+export class EquipmentAvgOverTimeParams {
   constructor(
-    public unit: SensorAverageByTimeUnit,
-    public limit: number
+    public unit: TimeUnit,
+    public date: Date,
+    public equipments: Array<string>
   ) { }
 
 }
