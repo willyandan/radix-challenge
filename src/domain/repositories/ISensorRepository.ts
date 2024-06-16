@@ -13,4 +13,5 @@ export interface ISensorRepository {
   getEquipmentAvgByTime(params: GetEquipmentByTimeParams): Promise<Array<EquipmentAvgOverTime>>
   getEquipmentStdDev(params: GetEquipmentStandardDeviationParams): Promise<Array<EquipmentStandardDeviation>>
   getSensorAvg(params: GetSensorAvgParams): Promise<Array<SensorAverage>>
+  getEquipments(): Promise<Array<string>>
 }

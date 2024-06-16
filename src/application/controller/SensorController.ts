@@ -12,6 +12,8 @@ import { plainToInstance } from 'class-transformer'
 import { Sensor } from '../../domain/models/Sensor'
 import { validate } from 'class-validator'
 import { RegisSensorBatch } from '../../domain/useCases/RegisterSensorBatch'
+import { GetEquipments } from '../../domain/useCases/GetEquipments'
+import { GetEquipmentResponse } from '../http/responses/GetEquipmentResponse'
 
 @injectable()
 @controller
@@ -22,6 +24,9 @@ export class SensorController {
 
   @inject(RegisSensorBatch)
   private registerSensorBatchUseCase!: RegisSensorBatch
+
+  @inject(GetEquipments)
+  private getEquipmentsUseCase!: GetEquipments
 
   @route(HttpMethods.POST, '/sensor')
   @request(CreateSensorRequest)
@@ -104,5 +109,11 @@ export class SensorController {
           resolve(new CreateSensorResponse())
         })
     })
+  }
+
+  @route(HttpMethods.GET, '/sensor/equipments')
+  async getEquipments() {
+    const result = await this.getEquipmentsUseCase.execute()
+    return new GetEquipmentResponse(result)
   }
 }
