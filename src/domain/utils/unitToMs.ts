@@ -8,7 +8,7 @@ export const unitToMs = (unit: TimeUnit) => {
     week: 6.048e+8,
     month: 2.628e+9,
     quarter: 5.256e+9,
-    year: 31535965440.0381851
+    year: 3.162e+10
   }
   return table[unit]
 }
