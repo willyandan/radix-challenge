@@ -67,10 +67,11 @@ export class SensorController {
     return new Transform({
       readableObjectMode: true,
       transform(chunk: Buffer, encoding, callback) {
-        const chunkLines = chunk.toString().split('\n')
+        const chunkLines = chunk.toString().split('\n').filter(line => line != '')
         if (!headLine) {
           headLine = chunkLines.shift()?.split(',') || []
         }
+
         const json = chunkLines.map(line => {
           const elements = line.split(',')
           return headLine.reduce((obj, head, i) => {
@@ -103,6 +104,7 @@ export class SensorController {
             console.log(errors)
             reject(new Error())
           }
+
           this.registerSensorBatchUseCase.execute(sensors)
         })
         .on('finish', () => {
