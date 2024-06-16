@@ -2,7 +2,7 @@ import 'reflect-metadata'
 import { Server } from './server'
 import { env } from './env'
 import { Container } from './infra/container'
-import { loadFiles } from './fileLoader'
+import { loadFiles } from './infra/utils/fileLoader'
 
 loadFiles().then(() => {
   const container = new Container

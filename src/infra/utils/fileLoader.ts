@@ -2,7 +2,7 @@ import path from 'path'
 import fs from 'fs'
 
 const loadControllers = async () => {
-  const folder = path.join(__dirname, '/application/controller')
+  const folder = path.join(__dirname, '../../application/controller')
   const files = fs.readdirSync(folder)
   for (const file of files) {
     const filePath = path.join(folder, file)
@@ -11,7 +11,7 @@ const loadControllers = async () => {
 }
 
 const loadRepos = async () => {
-  const folder = path.join(__dirname, '/infra/repositories')
+  const folder = path.join(__dirname, '../../infra/repositories')
   const files = fs.readdirSync(folder)
   for (const file of files) {
     const filePath = path.join(folder, file)
