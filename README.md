@@ -1,3 +1,6 @@
+## Documentação
+https://github.com/willyandan/radix-challenge/wiki
+
 ## Como Rodar o Projeto Radix Tech Challenge
 
 Este documento descreve os passos necessários para executar o projeto Radix Challenge localmente.
