@@ -10,6 +10,7 @@ import { HttpMethods, RequestMapper, RouteMetadata } from '../decorators/route'
 import { controllerList } from '../decorators/controller'
 import multer, { Multer } from 'multer'
 import { RequestHandler } from 'express-serve-static-core'
+import cors from 'cors'
 
 type RouteFunction = (req?: IRequest) => Promise<IResponse>
 
@@ -133,6 +134,7 @@ export class Router {
 
   getRoutes() {
     const controllers = controllerList.map(controller => this.container.container.get<IController>(controller.name))
+    this.router.use(cors())
     this.loadRoutes(controllers)
     return this.router
   }
